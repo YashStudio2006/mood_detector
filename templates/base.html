@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mood Detector{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+    <h1>🧠 Mood Detector</h1>
+    <p class="tagline">Tell it how you feel — it'll figure out your mood.</p>
+</header>
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+<footer class="footer">
+    <p>Made with Flask &amp; Jinja2</p>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

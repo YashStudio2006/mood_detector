@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Mood Detector — Home{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <h2>How are you feeling right now?</h2>
+    <form action="{{ url_for('log_mood') }}" method="POST" class="mood-form">
+        <textarea name="mood_text" placeholder="e.g. I'm feeling really excited today!" rows="3" required></textarea>
+        <button type="submit" class="btn-primary">Detect My Mood</button>
+    </form>
+</section>
+
+{% if history %}
+    {% set latest = history[0] %}
+    <section class="card result-card">
+        <span class="big-emoji">{{ latest.emoji }}</span>
+        <div>
+            <h3>Detected mood: {{ latest.mood }}</h3>
+            <p>{{ latest.message }}</p>
+            <p class="muted">"{{ latest.text }}"</p>
+        </div>
+    </section>
+{% else %}
+    <section class="card empty-state">
+        <p>No moods logged yet — type something above to get started!</p>
+    </section>
+{% endif %}
+
+<section class="two-col">
+
+    <div class="card">
+        <h3>Mood Overview</h3>
+        {% if mood_counts %}
+            <canvas id="moodChart"></canvas>
+        {% else %}
+            <p class="muted">Chart will appear once you log a mood.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="history-header">
+            <h3>History</h3>
+            {% if history %}
+                <form action="{{ url_for('clear_history') }}" method="POST">
+                    <button type="submit" class="btn-clear">Clear</button>
+                </form>
+            {% endif %}
+        </div>
+
+        {% if history %}
+            <ul class="history-list">
+            {% for entry in history %}
+                <li class="history-item">
+                    <span class="emoji">{{ entry.emoji }}</span>
+                    <div class="history-text">
+                        <strong>{{ entry.mood }}</strong>
+                        <p>{{ entry.text }}</p>
+                        <small>{{ entry.time }}</small>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">Your logged moods will show up here.</p>
+        {% endif %}
+    </div>
+
+</section>
+
+<script type="application/json" id="mood-data">{{ mood_counts | tojson }}</script>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const dataElement = document.getElementById('mood-data');
+    const moodData = JSON.parse(dataElement.textContent);
+    const labels = Object.keys(moodData);
+    const values = Object.values(moodData);
+
+    if (labels.length > 0) {
+        const ctx = document.getElementById('moodChart');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Times logged',
+                    data: values,
+                    backgroundColor: '#7c6cf7'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+</script>
+{% endblock %}
